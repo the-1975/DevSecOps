@@ -158,8 +158,6 @@ docker run aquasec/trivy image python:3.4-alpine
 
 ![Screenshot 2024-07-29 090420](https://github.com/the-1975/DevSecOps/blob/images/Netflix-clone-project/Screenshot%202024-07-29%20090420.png?raw=true)
 
-![Screenshot 2024-07-29 112504](https://github.com/the-1975/DevSecOps/blob/images/Netflix-clone-project/Screenshot%202024-07-29%20112504.png?raw=true)
-
 ![Screenshot 2024-07-29 113904](https://github.com/the-1975/DevSecOps/blob/images/Netflix-clone-project/Screenshot%202024-07-29%20113904.png?raw=true)
 
 ![Screenshot 2024-07-29 113945](https://github.com/the-1975/DevSecOps/blob/images/Netflix-clone-project/Screenshot%202024-07-29%20113945.png?raw=true)
