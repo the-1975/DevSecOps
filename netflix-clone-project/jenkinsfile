@@ -1,0 +1,104 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+        nodejs 'node16'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_CREDENTIALS = credentials('docker-hub-credentials')
+        TMDB_API_KEY = credentials('tmdb-api-key')
+        DOCKER_HUB_USERNAME = credentials('docker-hub-username')
+        GITHUB_REPO_URL = 'https://github.com/N4si/DevSecOps-Project.git'
+    }
+    stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'main', url: "${GITHUB_REPO_URL}"
+            }
+        }
+        stage("Sonarqube Analysis") {
+            steps {
+                withSonarQubeEnv('sonar-server') {
+                    sh '''$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=Netflix \
+                    -Dsonar.projectKey=Netflix'''
+                }
+            }
+        }
+        stage("quality gate") {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'Sonar-token'
+                }
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '''
+                    --scan ./ 
+                    --disableYarnAudit 
+                    --disableNodeAudit
+                    --format "ALL"
+                    --prettyPrint''', 
+                odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+        stage('TRIVY FS SCAN') {
+            steps {
+                script {
+                    sh '''
+                        docker run --rm -v $PWD:/root/src aquasec/trivy:latest \
+                        filesystem --format table --output trivyfs.txt /root/src
+                    '''
+                }
+            }
+        }
+        stage("Docker Build & Push") {
+            steps {
+                script {
+                    sh "docker build --build-arg TMDB_V3_API_KEY=${TMDB_API_KEY} -t netflix ."
+                    sh "docker tag netflix ${DOCKER_HUB_USERNAME}/netflix:latest"
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                        sh "docker push ${DOCKER_HUB_USERNAME}/netflix:latest"
+                    }
+                }
+            }
+        }
+        stage("TRIVY") {
+            steps {
+                script {
+                    sh '''
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                        aquasec/trivy:latest image ${DOCKER_HUB_USERNAME}/netflix:latest > trivyimage.txt
+                    '''
+                }
+            }
+        }
+        stage('Deploy to container') {
+            steps {
+                script {
+                    sh 'docker stop netflix || true'
+                    sh 'docker rm netflix || true'
+                    sh 'docker run -d --name netflix -p 8081:80 ${DOCKER_HUB_USERNAME}/netflix:latest'
+                }
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker logout'
+        }
+    }
+}
