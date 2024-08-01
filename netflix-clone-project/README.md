@@ -60,6 +60,11 @@ docker rm -vf $(docker ps -aq)
 docker rmi -f $(docker images -aq)
 ```
 
+#### Running SonarQube as a Docker Container
+```bash
+docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
+```
+
 #### Running Trivy as a Docker Container
 ##### Scan a Container Image for Vulnerabilities
 ```bash
