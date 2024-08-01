@@ -66,6 +66,8 @@ docker rmi -f $(docker images -aq)
 docker run aquasec/trivy image python:3.4-alpine
 ```
 
+#### Screenshots of Trials and Errors
+
 ![Screenshot 2024-07-25 103938](https://github.com/the-1975/DevSecOps/blob/images/Netflix-clone-project/Screenshot%202024-07-25%20103938.png?raw=true)
 
 ![Screenshot 2024-07-25 104013](https://github.com/the-1975/DevSecOps/blob/images/Netflix-clone-project/Screenshot%202024-07-25%20104013.png?raw=true)
