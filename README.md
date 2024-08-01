@@ -1,7 +1,3 @@
-Certainly! Here is a revised version of your README.md content for better readability:
-
----
-
 # DevSecOps Project
 
 ## Setup Netflix Clone on AWS using CI/CD, Security, Monitoring, and GitOps
