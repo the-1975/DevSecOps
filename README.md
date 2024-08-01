@@ -49,14 +49,9 @@ alias d=docker  # Personal preference to save some time
 docker run -d -p 8081:80 --name netflix netflix
 ```
 
-#### API Key for TMDB
-```plaintext
-01119ab9b167e67a13bd1a957defc40b
-```
-
 #### Re-build Integrating the API Key
 ```bash
-docker build --build-arg TMDB_V3_API_KEY=01119ab9b167e67a13bd1a957defc40b -t netflix .
+docker build --build-arg TMDB_V3_API_KEY=01119ab9b167e6 -t netflix .
 ```
 
 #### For Testing Purposes
